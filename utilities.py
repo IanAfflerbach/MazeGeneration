@@ -23,7 +23,7 @@ def convert_maze_to_image_array(m):
         img[:,i * (cell_size + 1)] = 0.0
         
     # Set "Hallways"
-    hall_size = 3
+    hall_size = 5
     for i in range(0, w):
         for j in range(0, h):
             if (m[i,j] & DIRECTIONS["S"]):
