@@ -41,6 +41,21 @@ class MazeBase:
             self.grid[l[0],col] ^= DIRECTIONS["S"]
             self.grid[g[0],col] ^= DIRECTIONS["N"]
         
+    def get_possible_edges(self, coord):
+        x, y = coord
+        edges = []
+        
+        if x != 0 and self.grid[x-1, y] == 0:
+            edges.append(((x, y), (x-1, y)))
+        if x != self.w - 1 and self.grid[x+1, y] == 0:
+            edges.append(((x, y), (x+1, y)))
+        if y != 0 and self.grid[x, y-1] == 0:
+            edges.append(((x, y), (x, y-1)))
+        if y != self.h - 1 and self.grid[x, y+1] == 0:
+            edges.append(((x, y), (x, y+1)))
+    
+        return edges
+    
     def display_data_grid(self):
         print(self.grid)
 
@@ -116,18 +131,23 @@ class PrimsMaze(MazeBase):
         
         if output_steps_flag:
             return step_array
-    
-    def get_possible_edges(self, coord):
-        x, y = coord
-        edges = []
         
-        if x != 0 and self.grid[x-1, y] == 0:
-            edges.append(((x, y), (x-1, y)))
-        if x != self.w - 1 and self.grid[x+1, y] == 0:
-            edges.append(((x, y), (x+1, y)))
-        if y != 0 and self.grid[x, y-1] == 0:
-            edges.append(((x, y), (x, y-1)))
-        if y != self.h - 1 and self.grid[x, y+1] == 0:
-            edges.append(((x, y), (x, y+1)))
+class RecursiveBacktrackMaze(MazeBase):
+    def __init__(self, w, h):
+        super().__init__(w, h)
+        
+    def generate(self, output_steps_flag):
+        setup_array = []
+        start_tuple = (random.randint(0, self.w - 1), random.randint(0, self.h - 1))
+        self.carve_path(start_tuple)
+        
+    def carve_path(self, coord):
+        edges = self.get_possible_edges(coord)
+        random.shuffle(edges)
+        for edge in edges:
+            if self.grid[edge[1]] != 0:
+                continue
+            self.add_edge(edge)
+            self.carve_path(edge[1])   
+        
     
-        return edges

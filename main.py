@@ -6,7 +6,7 @@ import maze_algorithms as mazes
 import utilities as util
 
 def main():
-    maze = mazes.PrimsMaze(50, 50)
+    maze = mazes.RecursiveBacktrackMaze(5, 5)
     maze_steps = maze.generate(False)
     
     img = util.convert_maze_to_image_array(maze.grid)
