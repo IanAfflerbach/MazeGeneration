@@ -3,7 +3,7 @@ import numpy as np
 
 DIRECTIONS = {"N": 0x1, "S": 0x2, "E": 0x4, "W": 0x8 }
 
-def get_directionless_room():
+def get_open_room():
     val = 0x0;
     for x in DIRECTIONS.values():
         val += x

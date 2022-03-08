@@ -8,12 +8,17 @@ class MazeBase:
         self.w = w
         self.h = h
         self.grid = img = np.zeros([w, h], dtype=int)
+        
+        self.step_array = []
         return
         
     def generate(self):
-        self.grid[:,:] = util.get_directionless_room()
+        self.grid[:,:] = util.get_open_room()
+            
+    def display_data_grid(self):
+        print(self.grid)
        
-    def init_edge_tuples(self):
+    def _init_edge_tuples(self):
         self.edges = []
         for i in range(0, self.w - 1):
             for j in range(0, self.h):
@@ -22,7 +27,7 @@ class MazeBase:
             for j in range(0, self.h - 1):
                 self.edges.append(((i, j), (i, j + 1)))
                 
-    def add_edge(self, edge):
+    def _add_edge(self, edge):
         l, g = edge
         if l[0] == g[0]:
             if l[1] > g[1]:
@@ -40,8 +45,10 @@ class MazeBase:
             
             self.grid[l[0],col] ^= DIRECTIONS["S"]
             self.grid[g[0],col] ^= DIRECTIONS["N"]
+            
+        self.step_array.append(np.copy(self.grid))
         
-    def get_possible_edges(self, coord):
+    def _get_possible_edges(self, coord):
         x, y = coord
         edges = []
         
@@ -55,18 +62,14 @@ class MazeBase:
             edges.append(((x, y), (x, y+1)))
     
         return edges
-    
-    def display_data_grid(self):
-        print(self.grid)
 
-class KruskalsMaze(MazeBase):
+class Kruskals(MazeBase):
     def __init__(self, w, h):
         super().__init__(w, h)
         
-    def generate(self, output_steps_flag):
-        self.init_edge_tuples()
+    def generate(self):
+        self._init_edge_tuples()
         cells = np.arange(self.w * self.h).reshape(self.w, self.h)
-        step_array = []
         
         random.shuffle(self.edges)
         for edge in self.edges:
@@ -75,9 +78,7 @@ class KruskalsMaze(MazeBase):
                 continue
                 
             # add edge
-            self.add_edge(edge)
-            if output_steps_flag != None:
-                step_array.append(np.copy(self.grid))
+            self._add_edge(edge)
             
             # reassign cells
             c_one = cells[edge[0]]
@@ -97,28 +98,22 @@ class KruskalsMaze(MazeBase):
                     break
             if result == True:
                 break
-        
-        if output_steps_flag:
-            return step_array
     
     
-class PrimsMaze(MazeBase):
+class Prims(MazeBase):
     def __init__(self, w, h):
         super().__init__(w, h)
         
-    def generate(self, output_steps_flag):
-        step_array = []
-        
+    def generate(self):
         start_tuple = (random.randint(0, self.w - 1), random.randint(0, self.h - 1))
-        curr_edges = self.get_possible_edges(start_tuple)
+        curr_edges = self._get_possible_edges(start_tuple)
         
         while len(curr_edges) != 0:
             random.shuffle(curr_edges)
             
             # add new edge to grid
             edge = curr_edges.pop()
-            self.add_edge(edge)
-            step_array.append(np.copy(self.grid))
+            self._add_edge(edge)
             
             # define start and end points
             start, dest = edge
@@ -127,27 +122,34 @@ class PrimsMaze(MazeBase):
             curr_edges = [edge for edge in curr_edges if edge[1] != dest]
             
             # get edges to add
-            curr_edges += self.get_possible_edges(dest)
+            curr_edges += self._get_possible_edges(dest)
         
-        if output_steps_flag:
-            return step_array
-        
-class RecursiveBacktrackMaze(MazeBase):
+class RecursiveBacktrack(MazeBase):
     def __init__(self, w, h):
         super().__init__(w, h)
         
-    def generate(self, output_steps_flag):
-        setup_array = []
+    def generate(self):
         start_tuple = (random.randint(0, self.w - 1), random.randint(0, self.h - 1))
-        self.carve_path(start_tuple)
+        self.__carve_path(start_tuple)
         
-    def carve_path(self, coord):
-        edges = self.get_possible_edges(coord)
+    def __carve_path(self, coord):
+        edges = self._get_possible_edges(coord)
         random.shuffle(edges)
         for edge in edges:
             if self.grid[edge[1]] != 0:
                 continue
-            self.add_edge(edge)
-            self.carve_path(edge[1])   
-        
+            self._add_edge(edge)
+            self.__carve_path(edge[1])   
+
+def get_gen(name):
+    gen_types = {
+        "kruskals": Kruskals,
+        "prims": Prims,
+        "recursive_backtrack": RecursiveBacktrack
+    }
     
+    if name not in gen_types:
+        print("type not supported")
+        quit()
+        
+    return gen_types[name]
