@@ -23,14 +23,23 @@ class MazeBase:
                 self.edges.append(((i, j), (i, j + 1)))
                 
     def add_edge(self, edge):
-        if edge[0][0] == edge[1][0]:
-            row = edge[0][0]
-            self.grid[row,edge[0][1]] ^= DIRECTIONS["E"]
-            self.grid[row,edge[1][1]] ^= DIRECTIONS["W"]
-        elif edge[0][1] == edge[1][1]:
-            col = edge[0][1]
-            self.grid[edge[0][0],col] ^= DIRECTIONS["S"]
-            self.grid[edge[1][0],col] ^= DIRECTIONS["N"]
+        l, g = edge
+        if l[0] == g[0]:
+            if l[1] > g[1]:
+                g, l = edge
+            row = l[0]
+            assert (self.grid[row,l[1]] & DIRECTIONS["E"]) == 0x0, "edge {} already exists".format(edge)            
+            
+            self.grid[row,l[1]] ^= DIRECTIONS["E"]
+            self.grid[row,g[1]] ^= DIRECTIONS["W"]
+        elif l[1] == g[1]:
+            if l[0] > g[0]:
+                g, l = edge
+            col = l[1]
+            assert (self.grid[l[0],col] & DIRECTIONS["S"]) == 0x0, "edge {} already exists".format(edge)  
+            
+            self.grid[l[0],col] ^= DIRECTIONS["S"]
+            self.grid[g[0],col] ^= DIRECTIONS["N"]
         
     def display_data_grid(self):
         print(self.grid)
@@ -39,7 +48,7 @@ class KruskalsMaze(MazeBase):
     def __init__(self, w, h):
         super().__init__(w, h)
         
-    def generate(self, output_steps):
+    def generate(self, output_steps_flag):
         self.init_edge_tuples()
         cells = np.arange(self.w * self.h).reshape(self.w, self.h)
         step_array = []
@@ -52,7 +61,7 @@ class KruskalsMaze(MazeBase):
                 
             # add edge
             self.add_edge(edge)
-            if output_steps != None:
+            if output_steps_flag != None:
                 step_array.append(np.copy(self.grid))
             
             # reassign cells
@@ -74,6 +83,51 @@ class KruskalsMaze(MazeBase):
             if result == True:
                 break
         
-        if output_steps:
+        if output_steps_flag:
             return step_array
     
+    
+class PrimsMaze(MazeBase):
+    def __init__(self, w, h):
+        super().__init__(w, h)
+        
+    def generate(self, output_steps_flag):
+        step_array = []
+        
+        start_tuple = (random.randint(0, self.w - 1), random.randint(0, self.h - 1))
+        curr_edges = self.get_possible_edges(start_tuple)
+        
+        while len(curr_edges) != 0:
+            random.shuffle(curr_edges)
+            
+            # add new edge to grid
+            edge = curr_edges.pop()
+            self.add_edge(edge)
+            step_array.append(np.copy(self.grid))
+            
+            # define start and end points
+            start, dest = edge
+            
+            # remove edges with same destination
+            curr_edges = [edge for edge in curr_edges if edge[1] != dest]
+            
+            # get edges to add
+            curr_edges += self.get_possible_edges(dest)
+        
+        if output_steps_flag:
+            return step_array
+    
+    def get_possible_edges(self, coord):
+        x, y = coord
+        edges = []
+        
+        if x != 0 and self.grid[x-1, y] == 0:
+            edges.append(((x, y), (x-1, y)))
+        if x != self.w - 1 and self.grid[x+1, y] == 0:
+            edges.append(((x, y), (x+1, y)))
+        if y != 0 and self.grid[x, y-1] == 0:
+            edges.append(((x, y), (x, y-1)))
+        if y != self.h - 1 and self.grid[x, y+1] == 0:
+            edges.append(((x, y), (x, y+1)))
+    
+        return edges

@@ -1,19 +1,19 @@
 import numpy as np
 import cv2
+import argparse
 
 import maze_algorithms as mazes
 import utilities as util
 
 def main():
-    maze = mazes.KruskalsMaze(5, 5)
-    maze_steps = maze.generate(True)
+    maze = mazes.PrimsMaze(50, 50)
+    maze_steps = maze.generate(False)
     
-    for m in maze_steps:
-        img = util.convert_maze_to_image_array(m)
-        resized = cv2.resize(img, (600,600), interpolation = cv2.INTER_AREA)
-        
-        cv2.imshow('test', resized)
-        cv2.waitKey(0)
+    img = util.convert_maze_to_image_array(maze.grid)
+    resized = cv2.resize(img, (600,600), interpolation = cv2.INTER_AREA)
+    
+    cv2.imshow('Maze', resized)
+    cv2.waitKey(0)
     
 if __name__ == "__main__":
     main()
