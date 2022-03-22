@@ -27,6 +27,8 @@ def output_data(filename, grid):
     ext = os.path.splitext(filename)[-1]
     if ext == ".txt":
         np.savetxt(filename, grid.astype(int), fmt='%i')
+    elif ext == ".png": # FIXME
+        cv2.imwrite(filename, util.convert_maze_to_image_array(grid))
     else:
         print("Error: Unsupported Output File Type...")
 
@@ -40,7 +42,7 @@ def main():
             display_grid(m)
     else:
         display_grid(maze.grid)
-        
+    
     read, write, time_taken = maze.get_stats()
     print("Read Instruction: ", read)
     print("Write Instructions: ", write)

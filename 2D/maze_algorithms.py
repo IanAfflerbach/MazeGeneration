@@ -164,11 +164,77 @@ class RecursiveBacktrack(MazeBase):
             self._add_edge(edge)
             self.__carve_path(edge[1])   
 
+
+class Ellers(MazeBase):
+    def __init__(self, w, h):
+        super().__init__(w, h)
+        
+    def generate(self):
+        self.start_time = time.time()
+        
+        # init first row
+        row_sets = list(range(self.w))
+        next_set_num = self.w
+        
+        for i in range(1, self.w):
+            # merge row and drip next row
+            row_sets = self.__random_cell_merge(row_sets, i-1)
+            next_sets = self.__random_drip(row_sets, i-1)
+            for j in range(self.w):
+                self.read_num += 1
+                if next_sets[j] == -1:
+                    self.write_num += 1
+                    next_sets[j] = next_set_num
+                    next_set_num += 1
+            row_sets = next_sets
+            
+        self.__final_row_merge(row_sets)
+        self.end_time = time.time()
+        
+    def __random_cell_merge(self, row, ind):
+        for i in range(1, len(row)):
+            self.read_num += 1
+            if row[i] != row[i-1] and random.randint(0,1) == 1:
+                self.write_num += 1
+                new, old = min(row[i], row[i-1]), max(row[i], row[i-1])
+                row[i] = row[i-1] = new
+                row = [new if x == old else x for x in row]
+                self._add_edge(((i-1, ind), (i, ind)))
+        return row
+        
+    def __final_row_merge(self, row):
+        for i in range(1, len(row)):
+            self.read_num += 1
+            if row[i] != row[i-1]:
+                self.write_num += 1
+                new, old = min(row[i], row[i-1]), max(row[i], row[i-1])
+                row[i] = row[i-1] = new
+                row = [new if x == old else x for x in row]
+                self._add_edge(((i-1, self.h-1), (i, self.h-1)))
+        
+    def __random_drip(self, row, ind):
+        next_row = [-1 for i in range(len(row))]
+        
+        for x in np.unique(np.array(row)):
+            indices = [j for j in range(len(row)) if row[j] == x]
+            self.read_num += len(row)
+            num_drip = random.randint(1, len(indices))
+            
+            random.shuffle(indices)
+            for j in range(num_drip):
+                self.write_num += 1
+                next_row[indices[j]] = x
+                self._add_edge(((indices[j], ind), (indices[j], ind + 1)))
+                
+        return next_row
+    
+
 def get_gen(name):
     gen_types = {
         "kruskals": Kruskals,
         "prims": Prims,
-        "recursive_backtrack": RecursiveBacktrack
+        "recursive_backtrack": RecursiveBacktrack,
+        "ellers": Ellers
     }
     
     if name not in gen_types:
