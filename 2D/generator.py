@@ -7,7 +7,7 @@ import maze_algorithms as mazes
 import utilities as util
 
 parser = argparse.ArgumentParser()
-parser.add_argument('generator_type', type=str, help='what type of generator')
+parser.add_argument('generator_type', type=str, help='what type of generator (kruskals, prims, recursive_backtrack, ellers)')
 parser.add_argument('--width', metavar='w', type=int, default=5, help='width of maze')
 parser.add_argument('--height', metavar='h', type=int, default=5, help='height of maze')
 parser.add_argument('--show_steps', type=bool, default=False, help='show slideshow of steps taken')
@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 
 def display_grid(grid):
-    img = util.convert_maze_to_image_array(grid)
+    img = util.convert_maze_to_image_array(grid, 5)
     resized = cv2.resize(img, (600,600), interpolation = cv2.INTER_AREA)
 
     cv2.imshow('Maze', resized)
@@ -26,7 +26,7 @@ def display_grid(grid):
 def output_data(filename, grid):
     ext = os.path.splitext(filename)[-1]
     if ext == ".txt":
-        np.savetxt(filename, grid.astype(int), fmt='%i')
+        util.output_txt_file(filename, grid)
     elif ext == ".png": # FIXME
         cv2.imwrite(filename, util.convert_maze_to_image_array(grid))
     else:
