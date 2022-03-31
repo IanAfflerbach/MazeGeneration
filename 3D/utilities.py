@@ -25,3 +25,13 @@ def convert_maze_to_list_of_lines(maze):
                     lines.append(((i, j, k), (i, j, k+1)))
 
     return lines
+    
+def output_txt_file(filename, grid):
+    with open(filename, "wb") as f:
+        w, h, l = np.shape(grid)
+        f.write(bytes("WIDTH: %i\n" % w, 'utf-8'));
+        f.write(bytes("HEIGHT: %i\n" % h, 'utf-8'));
+        f.write(bytes("LENGTH: %i\n" % l, 'utf-8'))
+        f.write(bytes("ENDIAN: BIG\n", 'utf-8'));
+        f.write(grid.tobytes());
+    return
