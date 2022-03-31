@@ -6,7 +6,9 @@ import solver_algorithms as solvers
 import utilities as util
 
 parser = argparse.ArgumentParser()
+parser.add_argument('solver', type=str, help='maze solver')
 parser.add_argument('file', type=str, help='maze file')
+parser.add_argument('--show_steps', type=bool, default=False, help='show slideshow of steps taken')
 args = parser.parse_args()
 
 def display_grid_and_path(grid, path):
@@ -18,10 +20,19 @@ def display_grid_and_path(grid, path):
 
 def main():
     grid = util.import_txt_file(args.file)
-    solver = solvers.RecursiveDFS(grid)
+    solver = solvers.get_solv(args.solver)(grid)
     solver.solve()
     
-    display_grid_and_path(solver.grid, solver.path)
+    if args.show_steps:
+        for p in solver.path_array:
+            display_grid_and_path(solver.grid, p)
+    else:
+        display_grid_and_path(solver.grid, solver.path)
+    
+    read, write, time_taken = solver.get_stats()
+    print("Read Instruction: ", read)
+    print("Write Instructions: ", write)
+    print("Time Taken: ", time_taken)
 
 if __name__ == "__main__":
     main()
