@@ -35,3 +35,18 @@ def output_txt_file(filename, grid):
         f.write(bytes("ENDIAN: BIG\n", 'utf-8'));
         f.write(grid.tobytes());
     return
+    
+def import_txt_file(filename):
+    with open(filename, "rb") as f:
+        lines = f.readlines()
+        
+        w = int(lines[0].decode('utf-8').split(' ')[1])
+        h = int(lines[1].decode('utf-8').split(' ')[1])
+        l = int(lines[2].decode('utf-8').split(' ')[1])
+        
+        b_str = b""
+        for i in range(4, len(lines)):
+            b_str += lines[i]
+            
+        grid = np.frombuffer(b_str, dtype=int).reshape((w, h, l))
+    return grid
