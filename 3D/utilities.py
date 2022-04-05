@@ -50,3 +50,63 @@ def import_txt_file(filename):
             
         grid = np.frombuffer(b_str, dtype=int).reshape((w, h, l))
     return grid
+    
+def create_viewer_image(grid):
+    cell_size = 5
+    w, h, l = np.shape(grid)
+    maze_w = cell_size * w + (w + 1)
+    maze_h = cell_size * h + (h + 1)
+    
+    img_w = maze_w * l + 2 * (l + 1)
+    img_h = maze_h + 4
+    
+    # print(maze_w, maze_h, img_w, img_h)
+    
+    # init image
+    img = np.ones((img_w, img_h, 3))
+    
+    # set image borders
+    img[0,:] = img[:,0] = img[-1,:] = img[:,-1] = [0.5, 0.5, 0.5]
+    
+    # set maze walls
+    for i in range(l):
+        row=i*(maze_h+2)
+        
+        for j in range(w+1):
+            sub_row=j*math.floor(maze_h/h)
+            img[2+row+sub_row,2:2+(maze_w)] = [0.0, 0.0, 0.0]
+        
+        for j in range(h+1):
+            sub_col=j*math.floor(maze_w/w)
+            img[2+row:2+(maze_h)+row,2+sub_col] = [0.0, 0.0, 0.0]
+    
+    # set maze hallways and portals
+    for i in range(l):
+        curr_grid = grid[:,:,i]
+        hall_size=cell_size-2
+        row=2+i*(2+maze_w)
+        col=2
+        
+        for j in range(0, w):
+            for k in range(0, h):
+                # hallways
+                if (curr_grid[j,k] & DIRECTIONS["N"]):
+                    sub_row = 2+j*math.floor(maze_h/h)
+                    sub_col = (k+1)*math.floor(maze_w/w)
+                    img[row+sub_row:row+sub_row+hall_size, col+sub_col] = [1.0, 1.0, 1.0]
+                if (curr_grid[j,k] & DIRECTIONS["E"]):
+                    sub_row = (j+1)*math.floor(maze_h/h)
+                    sub_col = 2+k*math.floor(maze_w/w)
+                    img[row+sub_row, col+sub_col:col+sub_col+hall_size] = [1.0, 1.0, 1.0]
+                
+                # portals
+                if (curr_grid[j,k] & DIRECTIONS["F"]):
+                    sub_row=1+j*math.floor(maze_h/h)
+                    sub_col=1+k*math.floor(maze_w/w)
+                    img[row+sub_row,col+sub_col]=[1.0, 0.0, 0.0]
+                if (curr_grid[j,k] & DIRECTIONS["B"]):
+                    sub_row=-1+(j+1)*math.floor(maze_h/h)
+                    sub_col=-1+(k+1)*math.floor(maze_w/w)
+                    img[row+sub_row,col+sub_col]=[0.0, 0.0, 1.0]
+
+    return img
