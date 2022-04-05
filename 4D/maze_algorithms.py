@@ -122,15 +122,15 @@ class MazeBase:
     
         return edges
 
-'''
+
 class Kruskals(MazeBase):
-    def __init__(self, w, h, l):
-        super().__init__(w, h, l)
+    def __init__(self, w, h, l, t):
+        super().__init__(w, h, l, t)
         
     def generate(self):
         self.start_time = time.time()
         self._init_edge_tuples()
-        cells = np.arange(self.w * self.h * self.l).reshape(self.w, self.h, self.l)
+        cells = np.arange(self.w * self.h * self.l * self.t).reshape(self.w, self.h, self.l, self.t)
         
         random.shuffle(self.edges)
         for edge in self.edges:
@@ -149,14 +149,15 @@ class Kruskals(MazeBase):
             for i in range(0, self.w):
                 for j in range(0, self.h):
                     for k in range(0, self.l):
-                        self.read_num += 1
-                        if cells[i,j,k] == c_one:
-                            cells[i,j,k] = c_two
+                        for g in range(self.t):
+                            self.read_num += 1
+                            if cells[i,j,k,g] == c_one:
+                                cells[i,j,k,g] = c_two
             
             # check if all cells are equal
-            check = cells[0,0,0]
+            check = cells[0,0,0,0]
             result = True
-            for x in cells.reshape(self.w * self.h * self.l):
+            for x in cells.reshape(self.w * self.h * self.l * self.t):
                 self.read_num += 1
                 if x != check:
                     result = False
@@ -165,14 +166,15 @@ class Kruskals(MazeBase):
                 break
         
         self.end_time = time.time()
-    
+
+
 class Prims(MazeBase):
-    def __init__(self, w, h, l):
-        super().__init__(w, h, l)
+    def __init__(self, w, h, l, t):
+        super().__init__(w, h, l, t)
         
     def generate(self):
         self.start_time = time.time()
-        start_tuple = (random.randint(0,self.w-1), random.randint(0,self.h-1), random.randint(0,self.l-1))
+        start_tuple = (random.randint(0,self.w-1), random.randint(0,self.h-1), random.randint(0,self.l-1), random.randint(0,self.t-1))
         curr_edges = self._get_possible_edges(start_tuple)
         
         while len(curr_edges) != 0:
@@ -194,7 +196,7 @@ class Prims(MazeBase):
             curr_edges += self._get_possible_edges(dest)
         
         self.end_time = time.time()
-'''
+
 
 class RecursiveBacktrack(MazeBase):
     def __init__(self, w, h, l, t):
@@ -219,8 +221,8 @@ class RecursiveBacktrack(MazeBase):
 
 def get_gen(name):
     gen_types = {
-        # "kruskals": Kruskals,
-        # "prims": Prims,
+        "kruskals": Kruskals,
+        "prims": Prims,
         "recursive_backtrack": RecursiveBacktrack
     }
     
