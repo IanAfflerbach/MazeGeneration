@@ -82,16 +82,15 @@ class RecursiveDFS(SolverBase):
         self.write_num += 1
         self.path.pop()
         self.path_array.append(np.copy(self.path))
-        
 
-'''
+
 class BFS(SolverBase):
     def __init__(self, grid):
         super().__init__(grid)
         
     def solve(self):
         self.start_time = time.time()
-        self.visited_points = np.zeros((self.w, self.h), dtype=int)
+        self.visited_points = np.zeros((self.w, self.h, self.l), dtype=int)
         path_queue = [[self.start_point]]
         
         while True:
@@ -116,21 +115,27 @@ class BFS(SolverBase):
         return
         
     def __get_connected_points(self, p):
-        x, y = p
+        x, y, z = p
         conn_points = []
-        self.read_num += 4
-        if self.grid[x, y] & DIRECTIONS["S"] != 0x0 and self.visited_points[x+1, y] == 0:
-            conn_points.append((x+1, y))
+        self.read_num += 6
+        if self.grid[x, y, z] & DIRECTIONS["E"] != 0x0 and self.visited_points[x+1, y, z] == 0:
+            conn_points.append((x+1, y, z))
             self.write_num += 1
-        if self.grid[x, y] & DIRECTIONS["N"] != 0x0 and self.visited_points[x-1, y] == 0:
-            conn_points.append((x-1, y))
+        if self.grid[x, y, z] & DIRECTIONS["W"] != 0x0 and self.visited_points[x-1, y, z] == 0:
+            conn_points.append((x-1, y, z))
             self.write_num += 1
-        if self.grid[x, y] & DIRECTIONS["E"] != 0x0 and self.visited_points[x, y+1] == 0:
-            conn_points.append((x, y+1))
+        if self.grid[x, y, z] & DIRECTIONS["N"] != 0x0 and self.visited_points[x, y+1, z] == 0:
+            conn_points.append((x, y+1, z))
             self.write_num += 1
-        if self.grid[x, y] & DIRECTIONS["W"] != 0x0 and self.visited_points[x, y-1] == 0:
-            conn_points.append((x, y-1))
-            self.write_num += 1            
+        if self.grid[x, y, z] & DIRECTIONS["S"] != 0x0 and self.visited_points[x, y-1, z] == 0:
+            conn_points.append((x, y-1, z))
+            self.write_num += 1   
+        if self.grid[x, y, z] & DIRECTIONS["F"] != 0x0 and self.visited_points[x, y, z+1] == 0:
+            conn_points.append((x, y, z+1))
+            self.write_num += 1 
+        if self.grid[x, y, z] & DIRECTIONS["B"] != 0x0 and self.visited_points[x, y, z-1] == 0:
+            conn_points.append((x, y, z-1))
+            self.write_num += 1              
         
         return conn_points
         
@@ -146,12 +151,12 @@ class BFS(SolverBase):
                 
         self.path_array.append(total_paths)
         return
-'''
+
 
 def get_solv(name):
     solv_types = {
         "recursive_dfs": RecursiveDFS,
-        # "bfs": BFS
+        "bfs": BFS
     }
     
     if name not in solv_types:
