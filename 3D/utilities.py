@@ -51,8 +51,7 @@ def import_txt_file(filename):
         grid = np.frombuffer(b_str, dtype=int).reshape((w, h, l))
     return grid
     
-def create_viewer_image(grid):
-    cell_size = 5
+def create_viewer_image(grid, cell_size):
     w, h, l = np.shape(grid)
     maze_w = cell_size * w + (w + 1)
     maze_h = cell_size * h + (h + 1)
@@ -109,4 +108,36 @@ def create_viewer_image(grid):
                     sub_col=-1+(k+1)*math.floor(maze_w/w)
                     img[row+sub_row,col+sub_col]=[0.0, 0.0, 1.0]
 
+    return img
+    
+def create_viewer_image_with_path(grid, path):
+    cell_size = 5
+    w, h, l = np.shape(grid)
+    maze_w = cell_size * w + (w + 1)
+    maze_h = cell_size * h + (h + 1)
+    img = create_viewer_image(grid, cell_size)
+    
+    for edge in path:
+        p_a, p_b = edge
+        
+        if p_a[0] > p_b[0] or p_a[1] > p_b[1]:
+            tmp = p_a
+            p_a = p_b
+            p_b = tmp
+        
+        x_a, y_a, z_a = p_a
+        x_b, y_b, z_b = p_b
+        
+        row_a = 5+x_a*math.floor(maze_h/h)+z_a*(2+maze_h)
+        col_a = 5+y_a*math.floor(maze_w/w)
+        
+        row_b = 5+x_b*math.floor(maze_h/h)+z_b*(2+maze_h)
+        col_b = 5+y_b*math.floor(maze_w/w)
+        
+        if z_a != z_b:
+            img[row_a,col_a] = [0.0, 0.0, 1.0]
+            img[row_b,col_b] = [0.0, 0.0, 1.0]
+        else:        
+            img[row_a:row_b+1,col_a:col_b+1] = [0.0, 0.0, 1.0]
+        
     return img
