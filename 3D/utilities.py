@@ -120,7 +120,7 @@ def create_viewer_image_with_path(grid, path):
     for edge in path:
         p_a, p_b = edge
         
-        if p_a[0] > p_b[0] or p_a[1] > p_b[1]:
+        if p_a[0] > p_b[0] or p_a[1] > p_b[1] or p_a[2] > p_b[2]:
             tmp = p_a
             p_a = p_b
             p_b = tmp
