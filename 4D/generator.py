@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import os
+import cv2
 import matplotlib.pyplot as plt
 
 import maze_algorithms as mazes
@@ -16,21 +17,13 @@ parser.add_argument('--show_steps', type=bool, default=False, help='show slidesh
 parser.add_argument('--output_file', type=str, default="null", help='output file')
 args = parser.parse_args()
 
-'''
-def display_grid(maze):
-    lines = util.convert_maze_to_list_of_lines(maze)
-    shape = np.shape(maze)
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    
-    for i in range(len(lines)):
-        ax.plot([lines[i][0][0], lines[i][1][0]], [lines[i][0][1], lines[i][1][1]], [lines[i][0][2], lines[i][1][2]])
-    
-    ax.set_xlim(0, shape[0] - 1)
-    ax.set_ylim(0, shape[1] - 1)
-    ax.set_zlim(0, shape[2] - 1)
-    plt.show()
-'''
+def display_grid(grid):
+    img = util.create_viewer_image(grid, 5)
+    resized = cv2.resize(img, (600,600), interpolation = cv2.INTER_AREA)
+
+    cv2.imshow('Maze', resized)
+    cv2.waitKey(0)
+    return
 
 def output_data(filename, grid):
     ext = os.path.splitext(filename)[-1]
@@ -44,14 +37,12 @@ def main():
     maze = mazes.get_gen(args.generator_type)(args.width, args.height, args.length, args.time)
     maze.generate()
 
-    '''
     if args.show_steps:
         for m in maze.step_array:
             display_grid(m)
     else:
         display_grid(maze.grid)
-    '''
-        
+      
     read, write, time_taken = maze.get_stats()
     print("Read Instruction: ", read)
     print("Write Instructions: ", write)
