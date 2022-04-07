@@ -58,6 +58,21 @@ def convert_maze_and_path_to_image_array(m, p, cell_size):
         img[row_a:row_b + 1, col_a:col_b + 1] = [0.0, 0.0, 1.0]
     return img;
     
+def convert_maze_and_xgrid_to_image_array(m, x, cell_size):
+    img = convert_maze_to_image_array(m, cell_size)
+    cross = [[[0.0, 0.0, 0.0] if i == j or i+j == cell_size-1 else [1.0, 1.0, 1.0] for i in range(cell_size)] for j in range(cell_size)]
+    
+    w, h = np.shape(x)
+    for i in range(w):
+        for j in range(h):
+            if x[i, j] == 0:
+                continue
+            row = 1+i*(cell_size+1)
+            col = 1+j*(cell_size+1)
+            img[row:row+cell_size,col:col+cell_size] = np.copy(cross)
+    
+    return img
+    
 def output_txt_file(filename, grid):
     with open(filename, "wb") as f:
         w, h = np.shape(grid)

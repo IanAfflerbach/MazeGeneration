@@ -11,6 +11,7 @@ class SolverBase:
         self.end_point = (self.w - 1, self.h - 1)
         self.path = []
         self.path_array = []
+        self.path_search_flag = True
         self.read_num = 0
         self.write_num = 0
         self.start_time = 0
@@ -142,10 +143,90 @@ class BFS(SolverBase):
         self.path_array.append(total_paths)
         return
 
+
+class DeadEndFilling(SolverBase):
+    def __init__(self, grid):
+        super().__init__(grid)
+        self.tmp_grid = np.copy(self.grid)
+        self.x_grid = np.zeros(np.shape(self.grid))
+        self.x_grid_array = []
+        self.path_search_flag = False
+        
+    def solve(self):
+        self.start_time = time.time()
+        while True:
+            dead_ends = self.__get_deadends()
+            if len(dead_ends) == 0:
+                break
+            self.__x_out_points(dead_ends)
+            
+        self.__get_path_from_open_cells()
+        self.end_time = time.time()
+        
+    def __get_deadends(self):
+        ends = []
+        
+        for i in range(self.w):
+            for j in range(self.h):
+                val = self.tmp_grid[i,j]
+                check = val == DIRECTIONS["N"] or val == DIRECTIONS["S"]
+                check = check or val == DIRECTIONS["E"] or val == DIRECTIONS["W"]
+                check = check and (i, j) != self.start_point and (i, j) != self.end_point
+                
+                if check:
+                    ends.append((i, j))
+    
+        return ends
+    
+    def __x_out_points(self, ends):
+        for e in ends:
+            x, y = e
+            self.x_grid[x, y] = 0x1
+            val = self.tmp_grid[x, y]
+            if val == DIRECTIONS["N"]:
+                self.tmp_grid[x, y] = 0x0
+                self.tmp_grid[x-1, y] ^= DIRECTIONS["S"]
+            if val == DIRECTIONS["S"]:
+                self.tmp_grid[x, y] = 0x0
+                self.tmp_grid[x+1, y] ^= DIRECTIONS["N"]
+            if val == DIRECTIONS["E"]:
+                self.tmp_grid[x, y] = 0x0
+                self.tmp_grid[x, y+1] ^= DIRECTIONS["W"]
+            if val == DIRECTIONS["W"]:
+                self.tmp_grid[x, y] = 0x0
+                self.tmp_grid[x, y-1] ^= DIRECTIONS["E"]
+        self.x_grid_array.append(np.copy(self.x_grid))
+    
+    def __get_path_from_open_cells(self):
+        i, j = (0, 0)
+        while True:
+            val = self.tmp_grid[i, j]
+            if val == DIRECTIONS["S"]:
+                self.path.append(((i, j), (i+1, j)))
+                self.tmp_grid[i+1, j] ^= DIRECTIONS["N"]
+                i = i+1
+            if val == DIRECTIONS["N"]:
+                self.path.append(((i, j), (i-1, j)))
+                self.tmp_grid[i-1, j] ^= DIRECTIONS["S"]
+                i = i-1
+            if val == DIRECTIONS["E"]:
+                self.path.append(((i, j), (i, j+1)))
+                self.tmp_grid[i, j+1] ^= DIRECTIONS["W"]
+                j = j+1
+            if val == DIRECTIONS["W"]:
+                self.path.append(((i, j), (i, j-1)))
+                self.tmp_grid[i, j-1] ^= DIRECTIONS["E"]
+                j = j-1
+                
+            if (i, j) == self.end_point:
+                break
+
+
 def get_solv(name):
     solv_types = {
         "recursive_dfs": RecursiveDFS,
-        "bfs": BFS
+        "bfs": BFS,
+        "deadend_filling": DeadEndFilling
     }
     
     if name not in solv_types:
