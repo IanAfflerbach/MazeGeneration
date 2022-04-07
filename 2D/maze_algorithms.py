@@ -163,6 +163,45 @@ class RecursiveBacktrack(MazeBase):
                 continue
             self._add_edge(edge)
             self.__carve_path(edge[1])   
+            
+         
+class HuntKill(MazeBase):
+    def __init__(self, w, h):
+        super().__init__(w, h)
+        
+    def generate(self):
+        x, y = random.randint(0, self.w-1), random.randint(0, self.h-1)
+        while (x, y) != (-1, -1):
+            self.__walk((x, y))
+            x, y = self.__hunt()
+    
+    def __walk(self, coord):
+        edges = self._get_possible_edges(coord)
+        if len(edges) == 0:
+            return
+        random.shuffle(edges)
+        self._add_edge(edges[0])
+        self.__walk(edges[0][1]) 
+        
+    def __hunt(self):
+        for i in range(self.w):
+            for j in range(self.h):
+                if self.grid[i, j] != 0x0:
+                    continue
+                if (i != 0) and self.grid[i-1,j] != 0x0:
+                    self._add_edge(((i,j),(i-1,j)))
+                    return (i,j)
+                if (j != 0) and self.grid[i,j-1] != 0x0:
+                    self._add_edge(((i,j),(i,j-1)))
+                    return (i,j)
+                if (i != self.w - 1) and self.grid[i+1,j] != 0x0:
+                    self._add_edge(((i,j),(i+1,j)))
+                    return (i,j)
+                if (j != self.h - 1) and self.grid[i,j+1] != 0x0:
+                    self._add_edge(((i,j),(i,j+1)))
+                    return (i,j)
+              
+        return (-1, -1)
 
 
 class Ellers(MazeBase):
@@ -234,6 +273,7 @@ def get_gen(name):
         "kruskals": Kruskals,
         "prims": Prims,
         "recursive_backtrack": RecursiveBacktrack,
+        "hunt_and_kill": HuntKill,
         "ellers": Ellers
     }
     
