@@ -55,9 +55,7 @@ def main():
     else:
         display_grid(maze.grid)
       
-    read, write, time_taken = maze.get_stats()
-    print("Read Instruction: ", read)
-    print("Write Instructions: ", write)
+    time_taken = maze.get_stats()
     print("Time Taken: ", time_taken)
     
     if args.output_file != "null":

@@ -11,8 +11,7 @@ class MazeBase:
         self.grid = img = np.zeros([w, h], dtype=int)
         
         self.step_array = []
-        self.read_num = 0
-        self.write_num = 0
+        self.step_array.append(np.copy(self.grid))
         self.start_time = 0
         self.end_time = 0
         return
@@ -24,7 +23,7 @@ class MazeBase:
         print(self.grid)
         
     def get_stats(self):
-        return self.read_num, self.write_num, self.end_time - self.start_time
+        return self.end_time - self.start_time
        
     def _init_edge_tuples(self):
         self.edges = []
@@ -55,7 +54,6 @@ class MazeBase:
             self.grid[g[0],col] ^= DIRECTIONS["N"]
             
         self.step_array.append(np.copy(self.grid))
-        self.write_num += 1
         
     def _get_possible_edges(self, coord):
         x, y = coord
@@ -84,7 +82,6 @@ class Kruskals(MazeBase):
         random.shuffle(self.edges)
         for edge in self.edges:
             # check if edge already exists
-            self.read_num += 1
             if (cells[edge[0]] == cells[edge[1]]):
                 continue
                 
@@ -97,7 +94,6 @@ class Kruskals(MazeBase):
             cells[edge[0]] = c_two
             for i in range(0, self.w):
                 for j in range(0, self.h):
-                    self.read_num += 1
                     if cells[i,j] == c_one:
                         cells[i,j] = c_two
             
@@ -105,7 +101,6 @@ class Kruskals(MazeBase):
             check = cells[0,0]
             result = True
             for x in cells.reshape(self.w * self.h):
-                self.read_num += 1
                 if x != check:
                     result = False
                     break
@@ -125,7 +120,6 @@ class Prims(MazeBase):
         curr_edges = self._get_possible_edges(start_tuple)
         
         while len(curr_edges) != 0:
-            self.read_num += 1
             random.shuffle(curr_edges)
             
             # add new edge to grid
@@ -136,7 +130,6 @@ class Prims(MazeBase):
             start, dest = edge
             
             # remove edges with same destination
-            self.read_num += len(curr_edges)
             curr_edges = [edge for edge in curr_edges if edge[1] != dest]
             
             # get edges to add
@@ -158,7 +151,6 @@ class RecursiveBacktrack(MazeBase):
         edges = self._get_possible_edges(coord)
         random.shuffle(edges)
         for edge in edges:
-            self.read_num += 1
             if self.grid[edge[1]] != 0:
                 continue
             self._add_edge(edge)
@@ -170,10 +162,12 @@ class HuntKill(MazeBase):
         super().__init__(w, h)
         
     def generate(self):
+        self.start_time = time.time()
         x, y = random.randint(0, self.w-1), random.randint(0, self.h-1)
         while (x, y) != (-1, -1):
             self.__walk((x, y))
             x, y = self.__hunt()
+        self.end_time = time.time()
     
     def __walk(self, coord):
         edges = self._get_possible_edges(coord)
@@ -220,9 +214,7 @@ class Ellers(MazeBase):
             row_sets = self.__random_cell_merge(row_sets, i-1)
             next_sets = self.__random_drip(row_sets, i-1)
             for j in range(self.w):
-                self.read_num += 1
                 if next_sets[j] == -1:
-                    self.write_num += 1
                     next_sets[j] = next_set_num
                     next_set_num += 1
             row_sets = next_sets
@@ -232,9 +224,7 @@ class Ellers(MazeBase):
         
     def __random_cell_merge(self, row, ind):
         for i in range(1, len(row)):
-            self.read_num += 1
             if row[i] != row[i-1] and random.randint(0,1) == 1:
-                self.write_num += 1
                 new, old = min(row[i], row[i-1]), max(row[i], row[i-1])
                 row[i] = row[i-1] = new
                 row = [new if x == old else x for x in row]
@@ -243,9 +233,7 @@ class Ellers(MazeBase):
         
     def __final_row_merge(self, row):
         for i in range(1, len(row)):
-            self.read_num += 1
             if row[i] != row[i-1]:
-                self.write_num += 1
                 new, old = min(row[i], row[i-1]), max(row[i], row[i-1])
                 row[i] = row[i-1] = new
                 row = [new if x == old else x for x in row]
@@ -256,12 +244,10 @@ class Ellers(MazeBase):
         
         for x in np.unique(np.array(row)):
             indices = [j for j in range(len(row)) if row[j] == x]
-            self.read_num += len(row)
             num_drip = random.randint(1, len(indices))
             
             random.shuffle(indices)
             for j in range(num_drip):
-                self.write_num += 1
                 next_row[indices[j]] = x
                 self._add_edge(((indices[j], ind), (indices[j], ind + 1)))
                 

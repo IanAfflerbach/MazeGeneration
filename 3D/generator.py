@@ -18,6 +18,14 @@ args = parser.parse_args()
 
 
 def display_grid(maze):
+    img = util.create_viewer_image(maze, 5)
+    resized = cv2.resize(img, (200,600), interpolation = cv2.INTER_AREA)
+
+    cv2.imshow('Maze', resized)
+    cv2.waitKey(0)
+
+
+def display_3D_grid(maze):
     lines = util.convert_maze_to_list_of_lines(maze)
     shape = np.shape(maze)
     fig = plt.figure()
@@ -56,18 +64,14 @@ def main():
     maze = mazes.get_gen(args.generator_type)(args.width, args.height, args.length)
     maze.generate()
     
-    read, write, time_taken = maze.get_stats()
-    print("Read Instruction: ", read)
-    print("Write Instructions: ", write)
+    time_taken = maze.get_stats()
     print("Time Taken: ", time_taken)
 
-    '''
     if args.show_steps:
         for m in maze.step_array:
             display_grid(m)
     else:
         display_grid(maze.grid)
-    '''
     
     if args.output_file != "null":
         output_data(maze)

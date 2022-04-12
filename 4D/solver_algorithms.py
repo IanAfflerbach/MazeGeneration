@@ -11,14 +11,12 @@ class SolverBase:
         self.end_point = (self.w - 1, self.h - 1, self.l - 1, self.t - 1)
         self.path = []
         self.path_array = []
-        self.read_num = 0
-        self.write_num = 0
         self.start_time = 0
         self.end_time = 0
         return
         
     def get_stats(self):
-        return self.read_num, self.write_num, self.end_time - self.start_time
+        return self.end_time - self.start_time
         
     def solve(self):
         print("Solving!")
@@ -69,7 +67,6 @@ class RecursiveDFS(SolverBase):
         result = -1
         
         if self.grid[start] & direct != 0x0 and self.visited_points[dest] == 0:
-            self.read_num += 1
             self.__add_path(start, dest)
             result = self.__move(dest)
             if result == -1:
@@ -78,12 +75,10 @@ class RecursiveDFS(SolverBase):
         return result
         
     def __add_path(self, start, dest):
-        self.write_num += 1
         self.path.append((start, dest))
         self.path_array.append(np.copy(self.path))
         
     def __pop_path(self, ):
-        self.write_num += 1
         self.path.pop()
         self.path_array.append(np.copy(self.path))
 
@@ -121,31 +116,22 @@ class BFS(SolverBase):
     def __get_connected_points(self, p):
         x, y, z, t = p
         conn_points = []
-        self.read_num += 6
         if self.grid[x, y, z, t] & DIRECTIONS["E"] != 0x0 and self.visited_points[x+1, y, z, t] == 0:
             conn_points.append((x+1, y, z, t))
-            self.write_num += 1
         if self.grid[x, y, z, t] & DIRECTIONS["W"] != 0x0 and self.visited_points[x-1, y, z, t] == 0:
             conn_points.append((x-1, y, z, t))
-            self.write_num += 1
         if self.grid[x, y, z, t] & DIRECTIONS["N"] != 0x0 and self.visited_points[x, y+1, z, t] == 0:
             conn_points.append((x, y+1, z, t))
-            self.write_num += 1
         if self.grid[x, y, z, t] & DIRECTIONS["S"] != 0x0 and self.visited_points[x, y-1, z, t] == 0:
-            conn_points.append((x, y-1, z, t))
-            self.write_num += 1   
+            conn_points.append((x, y-1, z, t)) 
         if self.grid[x, y, z, t] & DIRECTIONS["F"] != 0x0 and self.visited_points[x, y, z+1, t] == 0:
             conn_points.append((x, y, z+1, t))
-            self.write_num += 1 
         if self.grid[x, y, z, t] & DIRECTIONS["B"] != 0x0 and self.visited_points[x, y, z-1, t] == 0:
-            conn_points.append((x, y, z-1, t))
-            self.write_num += 1   
+            conn_points.append((x, y, z-1, t)) 
         if self.grid[x, y, z, t] & DIRECTIONS["C"] != 0x0 and self.visited_points[x, y, z, t+1] == 0:
-            conn_points.append((x, y, z, t+1))
-            self.write_num += 1       
+            conn_points.append((x, y, z, t+1))     
         if self.grid[x, y, z, t] & DIRECTIONS["R"] != 0x0 and self.visited_points[x, y, z, t-1] == 0:
-            conn_points.append((x, y, z, t-1))
-            self.write_num += 1              
+            conn_points.append((x, y, z, t-1))            
         
         return conn_points
         

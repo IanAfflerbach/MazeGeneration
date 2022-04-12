@@ -4,9 +4,9 @@ import argparse
 import os
 
 from PIL import Image
-
 import maze_algorithms as mazes
 import utilities as util
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('generator_type', type=str, help='what type of generator (kruskals, prims, recursive_backtrack, ellers)')
@@ -49,9 +49,7 @@ def main():
     maze = mazes.get_gen(args.generator_type)(args.width, args.height)
     maze.generate()
     
-    read, write, time_taken = maze.get_stats()
-    print("Read Instruction: ", read)
-    print("Write Instructions: ", write)
+    time_taken = maze.get_stats()
     print("Time Taken: ", time_taken)
 
     if args.show_steps:

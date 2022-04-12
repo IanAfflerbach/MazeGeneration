@@ -12,8 +12,6 @@ class MazeBase:
         self.grid = img = np.zeros([w, h, l], dtype=int)
         
         self.step_array = []
-        self.read_num = 0
-        self.write_num = 0
         self.start_time = 0
         self.end_time = 0
         return
@@ -22,7 +20,7 @@ class MazeBase:
         self.grid[:,:,:] = util.get_open_room()
         
     def get_stats(self):
-        return self.read_num, self.write_num, self.end_time - self.start_time
+        return self.end_time - self.start_time
 
 
     def _init_edge_tuples(self):
@@ -72,7 +70,6 @@ class MazeBase:
             self.grid[x,g[1],z] ^= DIRECTIONS["S"]
             
         self.step_array.append(np.copy(self.grid))
-        self.write_num += 1
     
     def _get_possible_edges(self, coord):
         x, y, z = coord
@@ -108,7 +105,6 @@ class Kruskals(MazeBase):
         random.shuffle(self.edges)
         for edge in self.edges:
             # check if edge already exists
-            self.read_num += 1
             if (cells[edge[0]] == cells[edge[1]]):
                 continue
                 
@@ -122,7 +118,6 @@ class Kruskals(MazeBase):
             for i in range(0, self.w):
                 for j in range(0, self.h):
                     for k in range(0, self.l):
-                        self.read_num += 1
                         if cells[i,j,k] == c_one:
                             cells[i,j,k] = c_two
             
@@ -130,7 +125,6 @@ class Kruskals(MazeBase):
             check = cells[0,0,0]
             result = True
             for x in cells.reshape(self.w * self.h * self.l):
-                self.read_num += 1
                 if x != check:
                     result = False
                     break
@@ -149,7 +143,6 @@ class Prims(MazeBase):
         curr_edges = self._get_possible_edges(start_tuple)
         
         while len(curr_edges) != 0:
-            self.read_num += 1
             random.shuffle(curr_edges)
             
             # add new edge to grid
@@ -160,7 +153,6 @@ class Prims(MazeBase):
             start, dest = edge
             
             # remove edges with same destination
-            self.read_num += len(curr_edges)
             curr_edges = [edge for edge in curr_edges if edge[1] != dest]
             
             # get edges to add
@@ -183,7 +175,6 @@ class RecursiveBacktrack(MazeBase):
         edges = self._get_possible_edges(coord)
         random.shuffle(edges)
         for edge in edges:
-            self.read_num += 1
             if self.grid[edge[1]] != 0:
                 continue
             self._add_edge(edge)

@@ -61,9 +61,7 @@ def main():
     solver = solvers.get_solv(args.solver)(grid)
     solver.solve()
     
-    read, write, time_taken = solver.get_stats()
-    print("Read Instruction: ", read)
-    print("Write Instructions: ", write)
+    time_taken = solver.get_stats()
     print("Time Taken: ", time_taken)
     
     if args.show_steps and solver.path_search_flag:

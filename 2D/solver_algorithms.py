@@ -12,14 +12,12 @@ class SolverBase:
         self.path = []
         self.path_array = []
         self.path_search_flag = True
-        self.read_num = 0
-        self.write_num = 0
         self.start_time = 0
         self.end_time = 0
         return
         
     def get_stats(self):
-        return self.read_num, self.write_num, self.end_time - self.start_time
+        return self.end_time - self.start_time
         
     def solve(self):
         print("Solving!")
@@ -62,7 +60,6 @@ class RecursiveDFS(SolverBase):
         result = -1
         
         if self.grid[start] & direct != 0x0 and self.visited_points[dest] == 0:
-            self.read_num += 1
             self.__add_path(start, dest)
             result = self.__move(dest)
             if result == -1:
@@ -71,12 +68,10 @@ class RecursiveDFS(SolverBase):
         return result
         
     def __add_path(self, start, dest):
-        self.write_num += 1
         self.path.append((start, dest))
         self.path_array.append(np.copy(self.path))
         
     def __pop_path(self, ):
-        self.write_num += 1
         self.path.pop()
         self.path_array.append(np.copy(self.path))
         
@@ -114,19 +109,14 @@ class BFS(SolverBase):
     def __get_connected_points(self, p):
         x, y = p
         conn_points = []
-        self.read_num += 4
         if self.grid[x, y] & DIRECTIONS["S"] != 0x0 and self.visited_points[x+1, y] == 0:
             conn_points.append((x+1, y))
-            self.write_num += 1
         if self.grid[x, y] & DIRECTIONS["N"] != 0x0 and self.visited_points[x-1, y] == 0:
             conn_points.append((x-1, y))
-            self.write_num += 1
         if self.grid[x, y] & DIRECTIONS["E"] != 0x0 and self.visited_points[x, y+1] == 0:
             conn_points.append((x, y+1))
-            self.write_num += 1
         if self.grid[x, y] & DIRECTIONS["W"] != 0x0 and self.visited_points[x, y-1] == 0:
-            conn_points.append((x, y-1))
-            self.write_num += 1            
+            conn_points.append((x, y-1))            
         
         return conn_points
         
