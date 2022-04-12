@@ -3,6 +3,8 @@ import cv2
 import argparse
 import os
 
+from PIL import Image
+
 import maze_algorithms as mazes
 import utilities as util
 
@@ -23,12 +25,22 @@ def display_grid(grid):
     cv2.waitKey(0)
  
  
-def output_data(filename, grid):
-    ext = os.path.splitext(filename)[-1]
+def output_data(maze):
+    ext = os.path.splitext(args.output_file)[-1]
     if ext == ".txt":
-        util.output_txt_file(filename, grid)
-    elif ext == ".png": # FIXME
-        cv2.imwrite(filename, util.convert_maze_to_image_array(grid))
+        util.output_txt_file(args.output_file, maze.grid)
+    elif ext == ".png":
+        img = util.convert_maze_to_image_array(maze.grid, 5)
+        resized = cv2.resize(img, (800, 800), interpolation = cv2.INTER_AREA)
+        cv2.imwrite(args.output_file, 255 * resized)
+    elif ext == ".mp4":
+        video = cv2.VideoWriter(args.output_file, cv2.VideoWriter_fourcc(*'mp4v'), 60, (800,800))
+        for i in range(len(maze.step_array)):
+            img = util.convert_maze_to_image_array(maze.step_array[i], 5)
+            resized = cv2.resize(img, (800, 800), interpolation = cv2.INTER_AREA)
+            print("Writing Video Frame " + str(i) + " of " + str(len(maze.step_array)) + "...\r", end="")
+            video.write((resized * 255).astype(np.uint8))
+        video.release()
     else:
         print("Error: Unsupported Output File Type...")
 
@@ -36,6 +48,11 @@ def output_data(filename, grid):
 def main():
     maze = mazes.get_gen(args.generator_type)(args.width, args.height)
     maze.generate()
+    
+    read, write, time_taken = maze.get_stats()
+    print("Read Instruction: ", read)
+    print("Write Instructions: ", write)
+    print("Time Taken: ", time_taken)
 
     if args.show_steps:
         for m in maze.step_array:
@@ -43,13 +60,8 @@ def main():
     else:
         display_grid(maze.grid)
     
-    read, write, time_taken = maze.get_stats()
-    print("Read Instruction: ", read)
-    print("Write Instructions: ", write)
-    print("Time Taken: ", time_taken)
-    
     if args.output_file != "null":
-        output_data(args.output_file, maze.grid)
+        output_data(maze)
     
 if __name__ == '__main__':
     main()
