@@ -1,17 +1,26 @@
 import numpy as np
 import random
 import time
+
 import utilities as util
 from utilities import DIRECTIONS
 
+
+# base class for a maze generator
 class MazeBase:
     def __init__(self, w, h):
+        # initialize class with given width and height
         self.w = w
         self.h = h
+        
+        # initialize maze with empty grid (no rooms connected)
         self.grid = img = np.zeros([w, h], dtype=int)
         
+        # start tracking changes made to maze
         self.step_array = []
         self.step_array.append(np.copy(self.grid))
+        
+        # stats to track
         self.start_time = 0
         self.end_time = 0
         return
@@ -25,6 +34,7 @@ class MazeBase:
     def get_stats(self):
         return self.end_time - self.start_time
        
+    # grabs all possible edges (hallways) in maze
     def _init_edge_tuples(self):
         self.edges = []
         for i in range(0, self.w - 1):
@@ -33,7 +43,8 @@ class MazeBase:
         for i in range(0, self.w):
             for j in range(0, self.h - 1):
                 self.edges.append(((i, j), (i, j + 1)))
-                
+
+    # connect two rooms in maze
     def _add_edge(self, edge):
         l, g = edge
         if l[0] == g[0]:
@@ -55,6 +66,7 @@ class MazeBase:
             
         self.step_array.append(np.copy(self.grid))
         
+    # get unconnected rooms to requested room
     def _get_possible_edges(self, coord):
         x, y = coord
         edges = []
@@ -70,6 +82,7 @@ class MazeBase:
     
         return edges
 
+
 class Kruskals(MazeBase):
     def __init__(self, w, h):
         super().__init__(w, h)
@@ -77,8 +90,10 @@ class Kruskals(MazeBase):
     def generate(self):
         self.start_time = time.time()
         self._init_edge_tuples()
-        cells = np.arange(self.w * self.h).reshape(self.w, self.h)
         
+        # which set is each room in
+        cells = np.arange(self.w * self.h).reshape(self.w, self.h)
+
         random.shuffle(self.edges)
         for edge in self.edges:
             # check if edge already exists
@@ -143,10 +158,14 @@ class RecursiveBacktrack(MazeBase):
         
     def generate(self):
         self.start_time = time.time()
+        
+        # start carving path through maze
         start_tuple = (random.randint(0, self.w - 1), random.randint(0, self.h - 1))
         self.__carve_path(start_tuple)
+        
         self.end_time = time.time()
         
+    # recursively connect random room then backtrack if none possible
     def __carve_path(self, coord):
         edges = self._get_possible_edges(coord)
         random.shuffle(edges)
@@ -169,6 +188,7 @@ class HuntKill(MazeBase):
             x, y = self.__hunt()
         self.end_time = time.time()
     
+    # carve path like in recrusive_backtrack, put stop if encounter deadend
     def __walk(self, coord):
         edges = self._get_possible_edges(coord)
         if len(edges) == 0:
@@ -177,6 +197,7 @@ class HuntKill(MazeBase):
         self._add_edge(edges[0])
         self.__walk(edges[0][1]) 
         
+    # find earliest room that is already connected
     def __hunt(self):
         for i in range(self.w):
             for j in range(self.h):

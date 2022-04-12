@@ -1,17 +1,27 @@
 import numpy as np
-import utilities as util
 import time
+
+import utilities as util
 from utilities import DIRECTIONS
 
+
+# base class for maze solvers
 class SolverBase:
     def __init__(self, grid):
+        # init maze grid and values
         self.grid = grid
         self.w, self.h = np.shape(self.grid)
+        
+        # set start and end point as corner to corner (FIXME)
         self.start_point = (0, 0)
         self.end_point = (self.w - 1, self.h - 1)
+        
+        # solution and steps taken to find solution
         self.path = []
         self.path_array = []
         self.path_search_flag = True
+        
+        # solver statistics
         self.start_time = 0
         self.end_time = 0
         return
@@ -30,20 +40,23 @@ class RecursiveDFS(SolverBase):
         
     def solve(self):
         self.start_time = time.time()
+        
+        # start unwinding thread in maze
         self.visited_points = np.zeros((self.w, self.h), dtype=int)        
         result = self.__move(self.start_point)
-        self.end_time = time.time()
         
+        self.end_time = time.time()
         if result == -1:
             print("ERROR: maze is disconnected")
         
     def __move(self, point):
+        # mark room as visited
         x, y = point
         self.visited_points[x, y] = 1
-        
         if (point == self.end_point):
             return 1
         
+        # check all adjacent rooms to find one that hasn't been visited
         result = -1
         if result == -1:
             result = self.__check_point((x, y), (x+1, y), DIRECTIONS["S"])
@@ -74,7 +87,7 @@ class RecursiveDFS(SolverBase):
     def __pop_path(self, ):
         self.path.pop()
         self.path_array.append(np.copy(self.path))
-        
+
 
 class BFS(SolverBase):
     def __init__(self, grid):
@@ -85,6 +98,7 @@ class BFS(SolverBase):
         self.visited_points = np.zeros((self.w, self.h), dtype=int)
         path_queue = [[self.start_point]]
         
+        # loop through possible hallways until you find destination point
         while True:
             curr_path = path_queue.pop(0)
             self.visited_points[curr_path[-1]] = 1
@@ -144,6 +158,8 @@ class DeadEndFilling(SolverBase):
         
     def solve(self):
         self.start_time = time.time()
+        
+        # cross out all dead ends (that are not start/end point) until none are left
         while True:
             dead_ends = self.__get_deadends()
             if len(dead_ends) == 0:
