@@ -19,7 +19,7 @@ args = parser.parse_args()
 
 def display_grid(maze):
     img = util.create_viewer_image(maze, 5)
-    resized = cv2.resize(img, (200,600), interpolation = cv2.INTER_AREA)
+    resized = cv2.resize(img, (150,600), interpolation = cv2.INTER_AREA)
 
     cv2.imshow('Maze', resized)
     cv2.waitKey(0)
