@@ -9,7 +9,7 @@ import utilities as util
 
 # parse command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('generator_type', type=str, help='what type of generator (kruskals, prims, recursive_backtrack, ellers)')
+parser.add_argument('generator_type', type=str, help='what type of generator (kruskals, prims, recursive_backtrack, ellers, hunt_and_kill)')
 parser.add_argument('--width', metavar='w', type=int, default=5, help='width of maze')
 parser.add_argument('--height', metavar='h', type=int, default=5, help='height of maze')
 parser.add_argument('--show_steps', type=bool, default=False, help='show slideshow of steps taken')

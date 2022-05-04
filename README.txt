@@ -1,8 +1,10 @@
+Installation within Conda Environment:
 conda create -n [env_name] python==3.7
-
 conda activate [env_name]
+pip install -r requirements.txt
 
-ND:
+For any ND Generator or Solver:
+cd [dimension_folder]
 generator.py --- used to create a maze
 output types: .txt (saves maze data for solution), .png, & .mp4
 

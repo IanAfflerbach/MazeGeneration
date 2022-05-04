@@ -1,14 +1,17 @@
 import math
 import numpy as np
 
+# possible directions to move/connect to
 DIRECTIONS = {"N": 0x1, "S": 0x2, "E": 0x4, "W": 0x8 }
 
+# room with all possible passageways
 def get_open_room():
     val = 0x0;
     for x in DIRECTIONS.values():
         val += x
     return val
     
+# create image array
 def convert_maze_to_image_array(m, cell_size):
     w, h = np.shape(m)
     img_w = cell_size * w + w + 1
@@ -36,6 +39,7 @@ def convert_maze_to_image_array(m, cell_size):
     
     return img
     
+# create image array with red path/solution line
 def convert_maze_and_path_to_image_array(m, p, cell_size):
     img = convert_maze_to_image_array(m, cell_size)
     
@@ -57,7 +61,8 @@ def convert_maze_and_path_to_image_array(m, p, cell_size):
         
         img[row_a:row_b + 1, col_a:col_b + 1] = [0.0, 0.0, 1.0]
     return img;
-    
+
+# convert maze to image array with x's in closed off rooms
 def convert_maze_and_xgrid_to_image_array(m, x, cell_size):
     img = convert_maze_to_image_array(m, cell_size)
     cross = [[[0.0, 0.0, 0.0] if i == j or i+j == cell_size-1 else [1.0, 1.0, 1.0] for i in range(cell_size)] for j in range(cell_size)]
@@ -73,6 +78,7 @@ def convert_maze_and_xgrid_to_image_array(m, x, cell_size):
     
     return img
     
+# convert maze to binary file
 def output_txt_file(filename, grid):
     with open(filename, "wb") as f:
         w, h = np.shape(grid)
@@ -82,6 +88,7 @@ def output_txt_file(filename, grid):
         f.write(grid.tobytes());
     return
     
+# impmort binary file as maze
 def import_txt_file(filename):
     with open(filename, "rb") as f:
         lines = f.readlines()

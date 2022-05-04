@@ -9,8 +9,8 @@ import utilities as util
 
 # parse command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('solver', type=str, help='maze solver')
-parser.add_argument('file', type=str, help='maze file')
+parser.add_argument('solver', type=str, help='maze solver (recursive_dfs, bfs, deadend_filling)')
+parser.add_argument('file', type=str, help='maze .txt file')
 parser.add_argument('--output_file', type=str, default="null", help='output file')
 parser.add_argument('--show_steps', type=bool, default=False, help='show slideshow of steps taken')
 args = parser.parse_args()
